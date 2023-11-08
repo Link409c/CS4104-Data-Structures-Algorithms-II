@@ -296,10 +296,10 @@ class WeightedGraph(Graph) :
         while not pq.is_empty():
             # extract the next minimum element
             u = pq.extract_min()
-            #u_d = pq.get_priority(u)
-            #u_pi = None
+            u_d = pq.get_priority(u)
+            u_pi = None
             # append it to the new list
-            #S.append((u, u_d, u_pi))
+            S.append((u, u_d, u_pi))
             # for each adjacent vertex v with connecting edge weight w,
             # adj[u] gives the list of adjacent vertices and weights
             # pass true to iteration function when using a weighted graph
@@ -316,6 +316,7 @@ class WeightedGraph(Graph) :
                     # decrease key
                     # call change priority function
                     pq.change_priority(v, v_d)
+            S.append((v, v_d, v_pi))
         return S
 
 class Digraph(Graph) :
