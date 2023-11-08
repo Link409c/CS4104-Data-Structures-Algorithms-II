@@ -223,7 +223,7 @@ class WeightedGraph(Graph) :
         #   implemented with a simple array for its priority queue.
         return self._dijkstra(s, ArrayPQInts(self.num_vertexes()))
 
-    def _dijkstra(self, s, pq) :
+    def _dijkstra(self, s, pq):
         """Dijkstra's Algorithm using a priority queue
         provided as a parameter.
 
@@ -280,8 +280,43 @@ class WeightedGraph(Graph) :
         #    Whenever you need to change the value of d for a vertex, don't forget to also
         #    call the appropriate method of pq to decrease that vertex's priority.  Your
         #    implementation will be incorrect if you forget to update priorities.
-        pass
 
+        #    22.3 Pg 620
+
+        # init_single_source has been covered by passing the priority queue to function
+        # initialize an empty array to hold updating shortest path values
+        S = []
+        # insert the source vertex into the priority queue with distance 0
+        pq.insert(s, 0)
+        # insert each vertex that is not the source into the priority queue with priority math.inf
+        for u in range(self.num_vertexes()):
+            if u != s:
+                pq.insert(u, math.inf)
+        # while the queue has elements,
+        while not pq.is_empty():
+            # extract the next minimum element
+            u = pq.extract_min()
+            #u_d = pq.get_priority(u)
+            #u_pi = None
+            # append it to the new list
+            #S.append((u, u_d, u_pi))
+            # for each adjacent vertex v with connecting edge weight w,
+            # adj[u] gives the list of adjacent vertices and weights
+            # pass true to iteration function when using a weighted graph
+            for v, w in self._adj[u].__iter__(True):
+                # relax the outgoing edges of u
+                # get priority values for each vertex
+                u_d, v_d = pq.get_priority(u), pq.get_priority(v)
+                # compare path through edge from u to v
+                # if current path is greater, use new
+                if v_d > u_d + w:
+                    # update d and pi values
+                    v_d = u_d + w
+                    v_pi = u
+                    # decrease key
+                    # call change priority function
+                    pq.change_priority(v, v_d)
+        return S
 
 class Digraph(Graph) :
     """Digraph represented with adjacency lists."""
