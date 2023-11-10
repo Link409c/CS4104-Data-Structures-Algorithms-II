@@ -1,5 +1,6 @@
 from graphshw import WeightedGraph
 import random
+from timeit import timeit
 
 # Student Name: Christian Simpson
 #
@@ -106,6 +107,12 @@ import random
 #     (d) Are your timing results consistent with your answer to question (a)?
 #         If not, what do you think caused the discrepancy?
 #
+#  Answers for (5):
+#       (a)
+#       (b)
+#       (c)
+#       (d)
+#
 # (6) OPTIONAL STEP (up to 15 points extra credit): In programming assignment 2, you
 #     implemented a parser for some highway graph data files. Implement another python
 #     module (i.e., another .py file) with an if main block where you: (a) get a highway
@@ -148,15 +155,46 @@ def random_weighted_graph(v,e,min_w,max_w) :
 def time_shortest_path_algs() :
     """Generates a table of timing results comparing two versions of Dijkstra"""
     # create a list of the edge / vertex numbers in tuples to generate each graph
+    graph_params = [(128, 8128), (256, 32640), (512, 130816), (1024, 523776), (64, 128),
+                    (128, 256), (256, 512), (512, 1024), (1024, 2048)]
+    # create a list of random upper bounds for edge weights
+    edge_weights = [10, 20, 30, 40, 50, 60]
     # create a list to hold tuples of graph elements and runtimes to return
-    # for each tuple in the list of graph parameters,
+    results = []
+    # number of runs of each algorithm
+    num_runs = 1
+    # initialize globals for timeit
+    def graphParams():
+        # use for setup parameter of timeit
+        nonlocal vertices
+        nonlocal edges
+        nonlocal G
+    def arrayTimeParams():
+        # use for first parameter when timing array based
+        nonlocal G
+        nonlocal dijkstraArrayPaths
+        dijkstraArrayPaths = G.dijkstra_array(0)
+    def binHeapTimeParams():
+        # use for first parameter when timing binary heap based
+        nonlocal G
+        nonlocal dijkstraBinHeapPaths
+        dijkstraBinHeapPaths = G.dijkstra_binheap(0)
+
+# for each tuple in the list of graph parameters,
+    for i in range(len(graph_params)):
+        # get the vertex and edge counts
+        vertices, edges = graph_params[i].__iter__()
         # call the random weighted graph function to generate a graph of those parameters
+        G = random_weighted_graph(vertices, edges, 1, edge_weights[random in range(len(edge_weights))])
+        # initialize timeit parameters
         # calculate runtimes using the array and binheap functions
+        arrayTime = timeit(arrayTimeParams, setup=graphParams, number=num_runs)
+        binHeapTime = timeit(binHeapTimeParams, setup=graphParams, number=num_runs)
         # add the vertices, edges, array time, binheap time to a tuple in that order
         # add the tuple to the list to return
+        results.append((vertices, edges, arrayTime, binHeapTime))
     # return the list of runtime results in a loop to be printed
-    pass
-
+    return results
 
 if __name__ == "__main__" :
     # Here is where you write some code to test that your algorithms
