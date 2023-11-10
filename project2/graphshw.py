@@ -283,9 +283,24 @@ class WeightedGraph(Graph) :
 
         #    22.3 Pg 620
 
+        # create a nested class with attributes for priority and parent values
+        # will make querying specific values easier
+        class VertexParams:
+            __slots__ = ['priority', 'parent']
+            # initializer
+            def __init__(self):
+                # default values for all but source are infinity and no parent
+                self.priority = math.inf
+                self.parent = None
         # init_single_source has been covered by passing the priority queue to function
+        # initialize an array to hold the vertex data
+        wg_vertex_data = [VertexParams() for _ in range(self.num_vertexes())]
+        # set source vertex priority to 0
+        wg_vertex_data[s].priority = 0
         # initialize an empty array to hold updating shortest path values
-        S = []
+        S = [self.num_vertexes()]
+        # initialize an array to hold the final results after all vertices are removed from pq
+        final_shortest_paths = [self.num_vertexes()]
         # insert the source vertex into the priority queue with distance 0
         pq.insert(s, 0)
         # insert each vertex that is not the source into the priority queue with priority math.inf
@@ -296,10 +311,8 @@ class WeightedGraph(Graph) :
         while not pq.is_empty():
             # extract the next minimum element
             u = pq.extract_min()
-            #u_d = pq.get_priority(u)
-            #u_pi = None
-            # append it to the new list
-            #S.append((u, u_d, u_pi))
+            # append min to the list S
+            S.append(u)
             # for each adjacent vertex v with connecting edge weight w,
             # adj[u] gives the list of adjacent vertices and weights
             # pass true to iteration function when using a weighted graph
@@ -311,12 +324,19 @@ class WeightedGraph(Graph) :
                 # if current path is greater, use new
                 if v_d > u_d + w:
                     # update d and pi values
-                    v_d = u_d + w
-                    v_pi = u
+                    # store this data in the vertex data array
+                    wg_vertex_data[v].priority = u_d + w
+                    wg_vertex_data[v].parent = u
                     # decrease key
                     # call change priority function
+                    # this updates the data for the vertices in the pq
                     pq.change_priority(v, v_d)
-        return S
+        # once all vertices have been iterated over, populate final results
+        # use S as reference
+        for u in S:
+            final_shortest_paths.append((u, wg_vertex_data[u].priority, wg_vertex_data[u].parent))
+        # return the result
+        return final_shortest_paths
 
 class Digraph(Graph) :
     """Digraph represented with adjacency lists."""
