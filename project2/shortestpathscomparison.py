@@ -108,10 +108,26 @@ from timeit import timeit
 #         If not, what do you think caused the discrepancy?
 #
 #  Answers for (5):
-#       (a)
-#       (b)
-#       (c)
-#       (d)
+#       (a) I would expect more dense graphs to perform better using an array. Because the Binary Heap
+#           needs to execute the percolate functions when element priority changes in order to maintain
+#           the heap property, there would be more operations overall. However, the binary heap should
+#           perform better on sparser graphs. There would be less calculations, and the operations would
+#           be able to access specific elements of the heap in less time.
+#
+#       (b) By my results, the array-based implementation actually ran less optimally on graphs with
+#           a number of edges equal double the vertex count. The binary heap implementation
+#           fared much better on these graphs than the array based implementation. Furthermore,
+#           the binary heap based implementation performed better than the array based overall.
+#
+#       (c) As stated above, the results show that size is also a factor in algorithm performance. Array
+#           based implementation showed a significant increase in runtime when tested on graphs of larger
+#           size but less density.
+#
+#       (d) When testing I noted a visible increase in the runtime of the sparse graphs, so I adjusted
+#           run numbers for these trials and tested again. After applying some uniformity to my runs,
+#           I again observed increased runtimes corfirming the behavior of the program. So, I can conclude
+#           that even with a sparser graph, the array based implementation of Djikstra's Algorithm performs
+#           less optimally as the size grows.
 #
 # (6) OPTIONAL STEP (up to 15 points extra credit): In programming assignment 2, you
 #     implemented a parser for some highway graph data files. Implement another python
@@ -155,15 +171,16 @@ def random_weighted_graph(v,e,min_w,max_w) :
 def time_shortest_path_algs() :
     """Generates a table of timing results comparing two versions of Dijkstra"""
     # create a list of the edge / vertex numbers in tuples to generate each graph
-    graph_params = [(128, 8128), (256, 32640), (512, 130816), (1024, 523776), (64, 128),
+    graph_params = [(64, 2016), (128, 8128), (256, 32640), (512, 130816), (1024, 523776), (64, 128),
                     (128, 256), (256, 512), (512, 1024), (1024, 2048)]
-    # create a list of random upper bounds for edge weights
-    edge_weights = [10, 20, 30, 40, 50, 60]
     # create a list to hold tuples of graph elements and runtimes to return
     results = []
-    # number of runs of each algorithm
-    num_runs = 1
+    # number of runs of each algorithm per graph
+    # corresponds to index of params list
+    # keep lower numbers for more dense or larger graphs
+    num_runs = [50, 50, 50, 50, 50, 300, 250, 200, 50, 50]
     # initialize globals for timeit
+    dijkstraArrayPaths, dijkstraBinHeapPaths = [], []
     def graphParams():
         # use for setup parameter of timeit
         nonlocal vertices
@@ -179,17 +196,16 @@ def time_shortest_path_algs() :
         nonlocal G
         nonlocal dijkstraBinHeapPaths
         dijkstraBinHeapPaths = G.dijkstra_binheap(0)
-
 # for each tuple in the list of graph parameters,
     for i in range(len(graph_params)):
         # get the vertex and edge counts
         vertices, edges = graph_params[i].__iter__()
         # call the random weighted graph function to generate a graph of those parameters
-        G = random_weighted_graph(vertices, edges, 1, edge_weights[random in range(len(edge_weights))])
+        G = random_weighted_graph(vertices, edges, 1, 100)
         # initialize timeit parameters
         # calculate runtimes using the array and binheap functions
-        arrayTime = timeit(arrayTimeParams, setup=graphParams, number=num_runs)
-        binHeapTime = timeit(binHeapTimeParams, setup=graphParams, number=num_runs)
+        arrayTime = timeit(arrayTimeParams, setup=graphParams, number=num_runs[i])
+        binHeapTime = timeit(binHeapTimeParams, setup=graphParams, number=num_runs[i])
         # add the vertices, edges, array time, binheap time to a tuple in that order
         # add the tuple to the list to return
         results.append((vertices, edges, arrayTime, binHeapTime))
@@ -203,13 +219,25 @@ if __name__ == "__main__" :
     # It is also where you will call your time_shortest_path_algs function.
     # Don't forget to save output to a text file.
     #
-    # create a file to hold output
-    # create a string for table header (vertices, edges, array time, binheap time)
-    # add table header to the file
-    # print table header
-    # call time_shortest_path_algs to populate the runtimes list
-    # for each tuple in the runtime list,
-        # add tuple values to the file
-        # print the values in order of the header
+    # test timing algorithm and printing results
+    time_array = time_shortest_path_algs()
+    print(f"{'# Vertices' : <11}{'# Edges' : <19}{'Time [Array]' : <20}{'Time [Binary Heap]' : <39}")
+    for i in range(len(time_array)):
+        v, e, timeArr, timeBin = time_array[i].__iter__()
+        print(f"{v : <11}{e : <19}{'%.3f' % timeArr : <20}{'%.3f' % timeBin : <39}")
     #
-    pass
+    # test file creation
+    # create a file to hold output
+    # pass x as second parameter for creating and writing to a new file
+    with open("timing results.txt", "x") as file:
+        # create a string for table header (vertices, edges, array time, binheap time)
+        header = ["# Vertices", "# Edges", "Time [Array]", "Time [Binary Heap]"]
+        # add table header to the file
+        file.write(f"{header[0] : <11}{header[1] : <19}{header[2] : <20}{header[3] : <39}")
+        file.write("\n")
+        # for each tuple in the runtime list,
+        for i in range(len(time_array)):
+            v, e, timeArr, timeBin = time_array[i].__iter__()
+            # add tuple values to the file
+            file.write(f"{v : <11}{e : <19}{'%.3f' % timeArr : <20}{'%.3f' % timeBin : <39}")
+            file.write("\n")
