@@ -298,9 +298,9 @@ class WeightedGraph(Graph) :
         # set source vertex priority to 0
         wg_vertex_data[s].priority = 0
         # initialize an empty array to hold updating shortest path values
-        S = [self.num_vertexes()]
+        S = []
         # initialize an array to hold the final results after all vertices are removed from pq
-        final_shortest_paths = [self.num_vertexes()]
+        final_shortest_paths = []
         # insert the source vertex into the priority queue with distance 0
         pq.insert(s, 0)
         # insert each vertex that is not the source into the priority queue with priority math.inf
@@ -313,19 +313,21 @@ class WeightedGraph(Graph) :
             u = pq.extract_min()
             # append min to the list S
             S.append(u)
+            # get priority of u
+            u_d = wg_vertex_data[u].priority
             # for each adjacent vertex v with connecting edge weight w,
             # adj[u] gives the list of adjacent vertices and weights
             # pass true to iteration function when using a weighted graph
             for v, w in self._adj[u].__iter__(True):
                 # relax the outgoing edges of u
                 # get priority values for each vertex
-                u_d, v_d = pq.get_priority(u), pq.get_priority(v)
+                v_d = wg_vertex_data[v].priority
                 # compare path through edge from u to v
                 # if current path is greater, use new
                 if v_d > u_d + w:
                     # update d and pi values
                     # store this data in the vertex data array
-                    wg_vertex_data[v].priority = u_d + w
+                    wg_vertex_data[v].priority = v_d = u_d + w
                     wg_vertex_data[v].parent = u
                     # decrease key
                     # call change priority function
