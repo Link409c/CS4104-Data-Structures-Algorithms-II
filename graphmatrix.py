@@ -138,6 +138,7 @@
 #    to the docstrings and comments I have there indicating what these should
 #    do. The extra credit portion is worth up to 25 points.
 import math
+import copy
 class WeightedAdjacencyMatrix :
     """A weighted graph represented as a matrix."""
 
@@ -163,7 +164,7 @@ class WeightedAdjacencyMatrix :
         self._W = [[math.inf for _ in range(size)] for _ in range(size)]
         # populate the matrix
         for _ in range(len(edges)):
-            i, j = edges.__iter__()
+            i, j = edges[_].__iter__()
             self.add_edge(i, j, weights[_])
 
     def add_edge(self, u, v, weight) :
@@ -210,17 +211,32 @@ class WeightedAdjacencyMatrix :
         # P 657 Floyd-Warshall Pseudocode
         # P 661 In-Place Floyd Warshall Implementation (23.2-4)
 
+        # get reference for _W size
+        listSize = len(self._W)
         # initialize a copy of the _W matrix D(k-1) using deep copy
+        D_kMinusOne = copy.deepcopy(self._W)
         # create a new matrix Dk to set new values to
+        D_k = [[math.inf for _ in range(listSize)] for _ in range(listSize)]
         # create a new 2D array P
+        P = [[math.inf for _ in range(listSize)] for _ in range(listSize)]
         # for range in matrix size
+        for k in range(listSize):
             # for i in range size
+            for i in range(listSize):
                 # for j in range size
+                for j in range(listSize):
                     # find the best path between i and j through k
+                    oldRef = D_k[i][j]
                     # set Dk[i][j] = min(D(k-1)[i][j], D(k-1)[i][k] + D(k-1)[k][j])
+                    D_k[i][j] = min(D_kMinusOne[i][j], D_kMinusOne[i][k] + D_kMinusOne[k][j])
                     # if Dk[i][j] changed,
-                    # set P[i][j] to k
+                    if(D_k[i][j] != oldRef):
+                        # new shortest path is found between i and j through k
+                        # set new parent of vertex [i][j]
+                        # set P[i][j] to k
+                        P[i][j] = k
             # set D(k-1) to Dk after iterating over entire matrix
+            D_kMinusOne = D_k
         # return Dk and P
 
         # Your return statement will look something like this one
@@ -231,7 +247,8 @@ class WeightedAdjacencyMatrix :
         # more like what it should look like:
         # return D, P
 
-        return None
+        return D_k, P
+
 
 class WeightedDirectedAdjacencyMatrix(WeightedAdjacencyMatrix) :
     """A weighted digraph represented as a matrix."""
@@ -244,12 +261,32 @@ class WeightedDirectedAdjacencyMatrix(WeightedAdjacencyMatrix) :
         v -- target vertex id (0-based index)
         weight -- edge weight
         """
-        pass # replace this pass statement with the code needed to implement this
-    
+        # for indexes of same vertex,
+        # set diagonal to zero
+        if u == v:
+            self._W[u][v] = 0
+        # else get the appropriate connecting edge weight
+        else:
+            self._W[u][v] = weight
 
 def test_floyd_warshall() :
     """See assignment instructions at top."""
-    pass # replace this pass statement with the code needed to implement this
+    # create 2 arrays of connected vertex pairs and edge weights
+    size = 5
+    edges = [[1,2], [1,3], [2,4], [3,4], [4,3], [5, None]]
+    weights = [1, 7, 4, 3, 8]
+    # initialize a weighted matrix using the arrays
+    W = WeightedAdjacencyMatrix(size, edges, weights)
+    # create a tuple of D and P list using the floyd warshall function passing the matrix
+    D_P = W.floyd_warshall()
+    # print the contents of each object in the tuple
+    # index 0 is D Matrix, index 1 is P Matrix
+    for i in range(len(D_P)):
+        for line in D_P[i]:
+            for _ in line:
+                print(_, end='\t')
+            print()
+        print()
 
 def parse_highway_graph_matrix(filename) :
     """EXTRA CREDIT: Rewrite your highway graph parser from
@@ -300,7 +337,7 @@ if __name__ == "__main__" :
     #   (f) Outputs the weight and path.
     #   (g) Repeats d, e, and f in a loop until the user indicates they
     #       want to quit.  You can decide how to get that decision from them.
-    pass # here temporarily until you implement this.
+    test_floyd_warshall()
     
 
 
