@@ -1,0 +1,18 @@
+34.2-6
+
+HAM-PATH(G,u,v):
+# for each possible permutation of vertices in G, - O(n)
+    # make a path using that list of vertices - O(1)
+    # verify no repeat edges exist - O(1)
+    # verify path length has the same number of vertices as G - O(1)
+    # verify each vertex pair has an edge connecting them in G - O(n)
+    # verify path starts at u and ends at v - O(1)
+    # if all conditions are satisfied, output is true - O(1)
+    # else output is false - O(1)
+# return the result
+
+possible runtime of the above algorithm is O(n^2).
+
+if the verification algorithm is comparing a correct hamiltonian path to
+each certificate output of HAM-PATH, and each execution of HAM-PATH takes
+polynomial time, then the language HAM-PATH belongs to NP.
