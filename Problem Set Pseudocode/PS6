@@ -1,0 +1,64 @@
+34.1-1
+
+LongestPathLength(G,u,v):
+    # initialize longest to 0
+    # assuming the graph is represented by a matrix,
+    # iterate over the vertices creating paths from u to v
+        # get the current path's length
+        # update the result if current path > longest
+    # return the result
+
+LongestPath(G,u,v,k):
+    # call LongestPathLength to compute length of longest path
+    # compare the path length to k
+    # return true if the length >= k
+    # false otherwise
+
+If LongestPath has a worst case runtime that is polynomial, then LongestPath is in P.
+If we call longestPathLength inside LongestPath, the runtime would still be polynomial.
+
+34.1-5
+
+if k = 0, time = polynomial.
+if k = n, time = n * polynomial = polynomial.
+if k = n + 1, time = n * polynomial + polynomial = polynomial.
+
+34.2-6
+
+Certificate: T, The list of edges comprising the hamiltonian path
+
+HAM-PATH(G,u,v):
+# for each possible permutation of vertices in G, - O(n)
+    # verify no repeat vertices exist - O(n)
+    # verify path length has the same number of edges as T - O(1)
+    # make a path using edges between pairs of vertices
+    # verify each vertex pair has an edge connecting them in G - O(n)
+    # verify path starts at u and ends at v - O(1)
+    # if all conditions are satisfied, output is true - O(1)
+    # else output is false - O(1)
+# return the result
+
+worst possible runtime of the above algorithm is O(n^2).
+
+if the verification algorithm is comparing a certificate to
+each output of HAM-PATH, and each execution of HAM-PATH takes
+polynomial time, then the language HAM-PATH belongs to NP.
+
+34.3-1
+* truth table attached
+
+34.4-2
+
+3CNF = All pieces must be conjunctions of 3 literals.
+
+y1 iif (y2 and ¬x2) =
+
+y2 iif (y3 or y4) =
+
+y3 iif (x1 then x2) =
+
+y4 iif ¬ y5 =
+
+y5 iif (y6 or x4) =
+
+y6 iif (¬ x1 iif x3) =
