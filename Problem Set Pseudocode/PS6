@@ -52,13 +52,13 @@ polynomial time, then the language HAM-PATH belongs to NP.
 3CNF = All pieces must be conjunctions of 3 literals.
 
 y1 iif (y2 and ¬x2) =
-
+    (y1 or y2 or ¬x2) and (¬y1 or y2 or x2) and (¬y1 or ¬y2 or x2) and (¬y1 or ¬y2 or ¬x2)
 y2 iif (y3 or y4) =
-
+    (y2 or ¬y3 or y4) and (y2 or y3 or ¬y4) and (y2 or y3 or y4)
 y3 iif (x1 then x2) =
 
-y4 iif ¬ y5 =
+y4 iif ¬y5 =
 
 y5 iif (y6 or x4) =
 
-y6 iif (¬ x1 iif x3) =
+y6 iif (¬x1 iif x3) =
