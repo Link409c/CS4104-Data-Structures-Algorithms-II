@@ -162,10 +162,13 @@ class WeightedAdjacencyMatrix :
         """
         # initialize _W as a 2D Array of size passed to function
         self._W = [[math.inf for _ in range(size)] for _ in range(size)]
-        # populate the matrix
-        for _ in range(len(edges)):
-            i, j = edges[_].__iter__()
-            self.add_edge(i, j, weights[_])
+        # set zeroes on the diagonal
+        for _ in range(size):
+            self.add_edge(_, _, 0)
+        # populate the weighted edges
+        for edge, weight in zip(edges, weights):
+            i, j = edge
+            self.add_edge(i, j, weight)
 
     def add_edge(self, u, v, weight) :
         """Adds an undirected edge between u to v with the specified weight.
@@ -175,13 +178,9 @@ class WeightedAdjacencyMatrix :
         v -- vertex id (0-based index)
         weight -- edge weight
         """
-        # for indexes of same vertex,
-        # set diagonal to zero
-        if u == v:
-            self._W[u][v] = 0
         # else get the appropriate connecting edge weight
-        else:
-            self._W[u][v] = weight
+        self._W[u][v] = weight
+        self._W[v][u] = weight
 
     def floyd_warshall(self) :
         """Floyd Warshall algorithm for all pairs shortest paths.
@@ -208,35 +207,72 @@ class WeightedAdjacencyMatrix :
         #    of the functions in the copy module. One of them will do the deep copy
         #    that you need.
 
-        # P 657 Floyd-Warshall Pseudocode
+        # P 657 Floyd Warshall Pseudocode
         # P 661 In-Place Floyd Warshall Implementation (23.2-4)
+
+        # initial implementation used D(k-1) matrix in each pass of loop.
+        # could not get predecessor matrix to update correctly using that version.
+        # changed implementation to simpler in-place updating of D(k) matrix.
+        # see submission comments for additional information.
 
         # get reference for _W size
         listSize = len(self._W)
         # initialize a copy of the _W matrix D(k-1) using deep copy
-        D_kMinusOne = copy.deepcopy(self._W)
-        # create a new matrix Dk to set new values to
-        D_k = [[math.inf for _ in range(listSize)] for _ in range(listSize)]
-        # create a new 2D array P
-        P = [[math.inf for _ in range(listSize)] for _ in range(listSize)]
+        #D_kMinusOne = copy.deepcopy(self._W)
+        # create a new 2d array Dk to set new values to
+        #D_k = [[math.inf for _ in range(listSize)] for _ in range(listSize)]
+        D_k = copy.deepcopy(self._W)
+        # create a new 2D array Pk to set predecessor values
+        P_k = [["nil" for _ in range(listSize)] for _ in range(listSize)]
+        for i in range(listSize):
+            for j in range(listSize):
+                if i == j or D_k[i][j] == math.inf:
+                    P_k[i][j] = "nil"
+                else:
+                    P_k[i][j] = str(i)
+        print("Predecessor Matrix:")
+        for line in P_k:
+            for predecessor in line:
+                print(predecessor, end='\t')
+            print()
+        print()
         # for range in matrix size
         for k in range(listSize):
             # for i in range size
             for i in range(listSize):
                 # for j in range size
                 for j in range(listSize):
+                    #oldWeight = D_k[i][j]
                     # find the best path between i and j through k
-                    oldRef = D_k[i][j]
+                    # if D_kMinusOne[i][j] > D_kMinusOne[i][k] + D_kMinusOne[k][j]:
+                    #     D_k[i][j] = D_kMinusOne[i][k] + D_kMinusOne[k][j]
+                    #     P[i][j] = P[k][j]
                     # set Dk[i][j] = min(D(k-1)[i][j], D(k-1)[i][k] + D(k-1)[k][j])
-                    D_k[i][j] = min(D_kMinusOne[i][j], D_kMinusOne[i][k] + D_kMinusOne[k][j])
+                    #D_k[i][j] = min(D_kMinusOne[i][j], D_kMinusOne[i][k] + D_kMinusOne[k][j])
                     # if Dk[i][j] changed,
-                    if(D_k[i][j] != oldRef):
+                    #if D_k[i][j] != oldWeight:
                         # new shortest path is found between i and j through k
                         # set new parent of vertex [i][j]
-                        # set P[i][j] to k
-                        P[i][j] = k
+                        #P_k[i][j] = str(j)
             # set D(k-1) to Dk after iterating over entire matrix
-            D_kMinusOne = D_k
+                    # new implementation here
+                    if D_k[i][j] > D_k[i][k] + D_k[k][j]:
+                        D_k[i][j] = D_k[i][k] + D_k[k][j]
+                        P_k[i][j] = P_k[k][j]
+            # print the matrices
+            print(f"D{k}:")
+            for line in D_k:
+                for weight in line:
+                    print(weight, end='\t')
+                print()
+            print()
+            print(f"P{k}:")
+            for line in P_k:
+                for predecessor in line:
+                    print(predecessor, end='\t')
+                print()
+            print()
+            #D_kMinusOne = D_k
         # return Dk and P
 
         # Your return statement will look something like this one
@@ -247,7 +283,7 @@ class WeightedAdjacencyMatrix :
         # more like what it should look like:
         # return D, P
 
-        return D_k, P
+        return D_k, P_k
 
 
 class WeightedDirectedAdjacencyMatrix(WeightedAdjacencyMatrix) :
@@ -261,32 +297,42 @@ class WeightedDirectedAdjacencyMatrix(WeightedAdjacencyMatrix) :
         v -- target vertex id (0-based index)
         weight -- edge weight
         """
-        # for indexes of same vertex,
-        # set diagonal to zero
-        if u == v:
-            self._W[u][v] = 0
         # else get the appropriate connecting edge weight
-        else:
-            self._W[u][v] = weight
+        self._W[u][v] = weight
 
 def test_floyd_warshall() :
     """See assignment instructions at top."""
+    # insert whatever values here to test
+    # test using example Fig 23.4 pg 658
     # create 2 arrays of connected vertex pairs and edge weights
     size = 5
-    edges = [[1,2], [1,3], [2,4], [3,4], [4,3], [5, None]]
-    weights = [1, 7, 4, 3, 8]
+    edges = [(0,1), (0,2), (0,4), (1,3), (1,4), (2,1), (3,0), (3,2), (4,3)]
+    weights = [3, 8, -4, 1, 7, 4, 2, -5, 6]
     # initialize a weighted matrix using the arrays
-    W = WeightedAdjacencyMatrix(size, edges, weights)
-    # create a tuple of D and P list using the floyd warshall function passing the matrix
+    W = WeightedDirectedAdjacencyMatrix(size, edges, weights)
+    # print the original matrix
+    print("\nDirected Weighted Matrix:")
+    for i in range(len(W._W)):
+        for j in range(len(W._W[0])):
+            print(W._W[i][j], end="\t")
+        print()
+    print()
+    # create a tuple of D and P list calling the floyd warshall function on W
     D_P = W.floyd_warshall()
     # print the contents of each object in the tuple
+    print("Shortest Paths:")
     # index 0 is D Matrix, index 1 is P Matrix
-    for i in range(len(D_P)):
-        for line in D_P[i]:
-            for _ in line:
-                print(_, end='\t')
-            print()
+    for line in D_P[0]:
+        for path_weight in line:
+            print(path_weight, end='\t')
         print()
+    print()
+    print("Predecessor Vertices:")
+    for line in D_P[1]:
+        for predecessor in line:
+            print(predecessor, end='\t')
+        print()
+    print()
 
 def parse_highway_graph_matrix(filename) :
     """EXTRA CREDIT: Rewrite your highway graph parser from
