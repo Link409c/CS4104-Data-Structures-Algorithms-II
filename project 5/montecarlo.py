@@ -1,7 +1,7 @@
 from timeit import timeit
 import math
-import sys
-import random
+from random import random
+from multiprocessing import Pool
 
 # You will need some import statements up here.
 
@@ -83,7 +83,18 @@ import random
 #    then you expected? You can just answer in a comment.
 #
 # 7) Submit the .py file and the textfile with the output.
-
+def calculateM():
+    """Helper method to calculate m, used in
+    estimating the value of pi.
+    """
+    # generate a random float between [0 and 1)
+    r = random()
+    # square this value
+    r = math.pow(r, 2)
+    # subtract this value from 1
+    r = 1 - r
+    # square root the result - this is m
+    return math.sqrt(r)
 def pi_monte_carlo(n) :
     """Computes and returns an estimation of pi
     using Monte Carlo simulation.
@@ -91,7 +102,14 @@ def pi_monte_carlo(n) :
     Keyword arguments:
     n - The number of samples.
     """
-    return None # This statement is here as a placeholder for your code.
+    # call calculateM to get an initial value for m
+    m = calculateM()
+    # loop for k from 2 to n
+    for k in range(2, n):
+        # add another value of calculateM minus m divided by k to m
+        m = m + ((calculateM() - m) / k)
+    # return 4m
+    return 4 * m
 
 def pi_parallel_monte_carlo(n, p=4) :
     """Computes and returns an estimation of pi
@@ -101,7 +119,17 @@ def pi_parallel_monte_carlo(n, p=4) :
     n - The total number of samples.
     p - The number of processes to use.
     """
-    return None # This statement is here as a placeholder for your code.
+    # get number of samples to dedicate to each process
+    samples = n // p
+    # make pool object using that number of processes
+    with Pool(p) as pool:
+        # use pool.map calls to add each result to L
+        # pass pi_monte_carlo and the number of samples repeated p times
+        L = pool.map(pi_monte_carlo, [samples] * p)
+    # after all processes have finished working close the pool
+    pool.close()
+    # average the list of results
+    return sum(L) / p
 
 def generate_table() :
     """This function should generate and print a table
@@ -116,14 +144,61 @@ def generate_table() :
     be the result of calling pi_monte_carlo(n), and you
     should then have 4 more columns for the parallel
     version, but with 1, 2, 3, and 4 processes in the Pool."""
-
-    pass # This statement is here as a placeholder for your code.
+    # create a list to hold values
+    L = []
+    # start estimation at n = 12
+    n = 12
+    # for each value of n up to 50331648,
+    # (this is 12 * 2^22)
+    for i in range(1, 23):
+        # call pi_monte_carlo for that n
+        estimate_pi = pi_monte_carlo(n)
+        # for p in range 1 to 4,
+        # call pi_parallel_monte_carlo for that n and p
+        par_list = [pi_parallel_monte_carlo(n, p) for p in range(1, 5)]
+        # add the list of parallel results to the list
+        L.append([[n, estimate_pi, par_list]])
+        # double n for the following iteration
+        n *= 2
+    return L
 
 def time() :
     """This function should generate a table of runtimes
     using timeit.  Use the same columns and values of
     n as in the generate_table() function.  When you use timeit
     for this, pass number=1 (because the high n values will be slow)."""
+    # create a list to hold values
+    L = []
+    # start estimation at n = 12
+    n = 12
+    # for each value of n up to 50331648,
+    # (this is 12 * 2^22)
+    for i in range(1, 23):
+        # time the normal algorithm
+        serial_pi = timeit(lambda: pi_monte_carlo(n), number=1)
+        # time the parallel algorithm for 1 - 4 processes as a list
+        parallel_pi = [timeit(lambda: pi_parallel_monte_carlo(n, p)) for p in range(1, 5)]
+        # add each value to the list
+        L.append([serial_pi, parallel_pi])
+        # double n for next pass
+        n *= 2
+    return L
 
-    pass # This statement is here as a placeholder for your code.
+def runAndTimePi():
+    """
+    Helper function to create the tables and print results.
+    """
+    # create 2 lists to hold all values
+    # call generate_table() and time() to populate the lists
+    estimated_pi_values = generate_table()
+    algorithm_runtimes = time()
+    # print the header
+    print("n\tSerial\tParallel (p=1)\tParallel (p=2)\tParallel (p=3)\tParallel (p=4)")
+    # print the list of results
+    for i in range(len(algorithm_runtimes)):
+        # print values then times
+        print('\t'.join(map(str, estimated_pi_values[i] + algorithm_runtimes[i])))
 
+if __name__ == "__main__":
+    # testing table display
+    runAndTimePi()
