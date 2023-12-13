@@ -177,7 +177,7 @@ def time() :
         # time the normal algorithm
         serial_pi = timeit(lambda: pi_monte_carlo(n), number=1)
         # time the parallel algorithm for 1 - 4 processes as a list
-        parallel_pi = [timeit(lambda: pi_parallel_monte_carlo(n, p)) for p in range(1, 5)]
+        parallel_pi = [timeit(lambda: pi_parallel_monte_carlo(n, p), number=1) for p in range(1, 5)]
         # add each value to the list
         L.append([serial_pi, parallel_pi])
         # double n for next pass
@@ -193,7 +193,8 @@ def runAndTimePi():
     estimated_pi_values = generate_table()
     algorithm_runtimes = time()
     # print the header
-    print("n\tSerial\tParallel (p=1)\tParallel (p=2)\tParallel (p=3)\tParallel (p=4)")
+    print("n\tSerial\tParallel (p=1)\tParallel (p=2)\tParallel (p=3)\tParallel (p=4)\t Time: Serial\t"
+          "Parallel (p=1)\tParallel (p=2)\tParallel (p=3)\tParallel (p=4)")
     # print the list of results
     for i in range(len(algorithm_runtimes)):
         # print values then times
